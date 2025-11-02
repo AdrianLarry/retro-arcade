@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test de Sonidos</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #000;
+        color: #0f0;
+        padding: 20px;
+        text-align: center;
+      }
+
+      button {
+        padding: 20px;
+        margin: 10px;
+        font-size: 18px;
+        background: #0f0;
+        color: #000;
+        border: none;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #0ff;
+      }
+
+      #status {
+        margin: 20px;
+        font-size: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🔊 Test de Sonidos y Controles</h1>
+
+    <div id="status">Estado: Esperando...</div>
+
+    <div>
+      <h2>Sonidos de Pac-Man</h2>
+      <button onclick="testSound('wakka')">Wakka Wakka</button>
+      <button onclick="testSound('death')">Muerte</button>
+      <button onclick="testSound('eatGhost')">Comer Fantasma</button>
+      <button onclick="testSound('powerPellet')">Power Pellet</button>
+      <button onclick="testSound('music')">Música de Fondo</button>
+    </div>
+
+    <div>
+      <h2>Otros Sonidos</h2>
+      <button onclick="testSound('victory')">Victoria</button>
+      <button onclick="testSound('gameOver')">Game Over</button>
+      <button onclick="testSound('click')">Click</button>
+    </div>
+
+    <div>
+      <h2>Control</h2>
+      <button onclick="toggleMute()">🔊 Mutear/Desmutear</button>
+      <button onclick="stopMusic()">⏹️ Parar Música</button>
+    </div>
+
+    <div style="margin-top: 30px">
+      <p>Presioná las FLECHAS del teclado:</p>
+      <div
+        id="keypress"
+        style="font-size: 24px; padding: 20px; border: 2px solid #0f0"
+      >
+        Esperando tecla...
+      </div>
+    </div>
+
+    <script src="sounds.js"></script>
+    <script>
+      const sounds = new RetroSounds();
+      const initialized = sounds.init();
+
+      document.getElementById("status").textContent = initialized
+        ? "Estado: ✅ Audio inicializado correctamente"
+        : "Estado: ❌ Error al inicializar audio";
+
+      function testSound(type) {
+        document.getElementById(
+          "status"
+        ).textContent = `Reproduciendo: ${type}...`;
+
+        switch (type) {
+          case "wakka":
+            sounds.pacmanWakka();
+            break;
+          case "death":
+            sounds.pacmanDeath();
+            break;
+          case "eatGhost":
+            sounds.pacmanEatGhost();
+            break;
+          case "powerPellet":
+            sounds.pacmanPowerPellet();
+            break;
+          case "music":
+            sounds.playBackgroundMusic();
+            break;
+          case "victory":
+            sounds.victory();
+            break;
+          case "gameOver":
+            sounds.gameOver();
+            break;
+          case "click":
+            sounds.buttonClick();
+            break;
+        }
+
+        setTimeout(() => {
+          document.getElementById("status").textContent =
+            "Estado: ✅ Listo para más tests";
+        }, 1000);
+      }
+
+      function toggleMute() {
+        const muted = sounds.toggleMute();
+        document.getElementById("status").textContent = muted
+          ? "Estado: 🔇 MUTEADO"
+          : "Estado: 🔊 SONIDO ON";
+      }
+
+      function stopMusic() {
+        sounds.stopBackgroundMusic();
+        document.getElementById("status").textContent =
+          "Estado: ⏹️ Música detenida";
+      }
+
+      // Test de teclas
+      document.addEventListener("keydown", (e) => {
+        const keyDisplay = document.getElementById("keypress");
+        let arrow = "";
+
+        switch (e.key) {
+          case "ArrowUp":
+            arrow = "⬆️ ARRIBA";
+            break;
+          case "ArrowDown":
+            arrow = "⬇️ ABAJO";
+            break;
+          case "ArrowLeft":
+            arrow = "⬅️ IZQUIERDA";
+            break;
+          case "ArrowRight":
+            arrow = "➡️ DERECHA";
+            break;
+          default:
+            arrow = `Tecla: ${e.key}`;
+        }
+
+        keyDisplay.textContent = arrow;
+        keyDisplay.style.background = "#0f0";
+        keyDisplay.style.color = "#000";
+
+        setTimeout(() => {
+          keyDisplay.style.background = "transparent";
+          keyDisplay.style.color = "#0f0";
+        }, 200);
+      });
+    </script>
+  </body>
+</html>

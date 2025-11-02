@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🕹️ Retro Arcade - Juegos Clásicos Gratis</title>
+    <link rel="icon" type="image/png" href="retroarcade.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+    />
+    <meta
+      property="og:title"
+      content="🕹️ Retro Arcade - Juegos Clásicos Gratis"
+    />
+    <meta
+      property="og:description"
+      content="Reviví los juegos sanos, clásicos y 100% gratuitos. Sin anuncios, solo pura diversión familiar."
+    />
+    <meta
+      property="og:image"
+      content="https://thesseract.com/retro-arcade/retro-arcade-preview.png"
+    />
+    <meta property="og:url" content="https://thesseract.com/retro-arcade/" />
+    <meta property="og:type" content="website" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Press Start 2P", "Courier New", monospace;
+        background: linear-gradient(45deg, #1a0033, #330066, #1a0033);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        overflow-x: hidden;
+      }
+
+      @keyframes gradientShift {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* Título principal */
+      .main-title {
+        text-align: center;
+        margin: 20px 0;
+        position: relative;
+      }
+
+      .main-title h1 {
+        font-size: 3em;
+        color: #ff00ff;
+        text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff,
+          4px 4px 0 #00ffff;
+        animation: titleGlow 2s ease-in-out infinite alternate;
+        margin-bottom: 10px;
+      }
+
+      @keyframes titleGlow {
+        from {
+          text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 30px #ff00ff,
+            4px 4px 0 #00ffff;
+        }
+        to {
+          text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff, 0 0 60px #ff00ff,
+            4px 4px 0 #00ffff;
+        }
+      }
+
+      .subtitle {
+        font-size: 0.8em;
+        color: #00ffff;
+        text-shadow: 0 0 10px #00ffff;
+        animation: blink 1.5s infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        49% {
+          opacity: 1;
+        }
+        50%,
+        100% {
+          opacity: 0.3;
+        }
+      }
+
+      /* Contenedor de juegos */
+      .games-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        max-width: 1200px;
+        width: 100%;
+        margin: 20px 0;
+      }
+
+      /* Tarjeta de juego */
+      .game-card {
+        background: rgba(0, 0, 0, 0.7);
+        border: 4px solid #ff00ff;
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        box-shadow: 0 0 20px rgba(255, 0, 255, 0.5),
+          inset 0 0 20px rgba(255, 0, 255, 0.1);
+      }
+
+      .game-card:hover {
+        transform: translateY(-10px) scale(1.05);
+        border-color: #00ffff;
+        box-shadow: 0 0 40px rgba(0, 255, 255, 0.8),
+          inset 0 0 30px rgba(0, 255, 255, 0.2);
+      }
+
+      .game-card::before {
+        content: "";
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(45deg, #ff00ff, #00ffff, #ff00ff);
+        border-radius: 15px;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .game-card:hover::before {
+        opacity: 0.3;
+        animation: borderRotate 3s linear infinite;
+      }
+
+      @keyframes borderRotate {
+        0% {
+          filter: hue-rotate(0deg);
+        }
+        100% {
+          filter: hue-rotate(360deg);
+        }
+      }
+
+      .game-icon {
+        font-size: 4em;
+        margin-bottom: 20px;
+        display: block;
+        animation: bounce 2s infinite;
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+      }
+
+      .game-card h2 {
+        font-size: 1.5em;
+        color: #ffff00;
+        text-shadow: 0 0 10px #ffff00;
+        margin-bottom: 15px;
+      }
+
+      .game-card p {
+        font-size: 0.7em;
+        color: #00ffff;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .play-button {
+        background: linear-gradient(45deg, #ff00ff, #ff0080);
+        color: #fff;
+        border: 3px solid #fff;
+        padding: 15px 30px;
+        font-size: 0.9em;
+        font-family: inherit;
+        cursor: pointer;
+        border-radius: 10px;
+        text-transform: uppercase;
+        transition: all 0.3s;
+        box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .play-button:hover {
+        background: linear-gradient(45deg, #00ffff, #0080ff);
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+        transform: scale(1.1);
+      }
+
+      /* Footer */
+      .footer {
+        margin-top: 25px;
+        text-align: center;
+        color: #00ffff;
+        font-size: 0.7em;
+        padding: 20px;
+        border-top: 2px solid #ff00ff;
+        width: 100%;
+        max-width: 1200px;
+      }
+
+      .footer p {
+        margin: 10px 0;
+        text-shadow: 0 0 5px #00ffff;
+      }
+
+      /* Estrellas de fondo */
+      .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: white;
+        border-radius: 50%;
+        animation: twinkle 3s infinite;
+      }
+
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.2;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .main-title h1 {
+          font-size: 1.8em;
+        }
+
+        .games-container {
+          grid-template-columns: 1fr;
+        }
+
+        .game-card {
+          padding: 20px;
+        }
+      }
+
+      /* Banner de bienvenida */
+      .welcome-banner {
+        background: rgba(0, 0, 0, 0.7);
+        border: 3px solid #00ffff;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 25px;
+        text-align: center;
+        max-width: 900px;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        animation: fadeIn 2s ease;
+      }
+
+      .welcome-banner h2 {
+        color: #ff00ff;
+        font-size: 1.5em;
+        margin-bottom: 15px;
+        text-shadow: 0 0 10px #ff00ff;
+      }
+
+      .welcome-banner p {
+        color: #00ffff;
+        font-size: 0.9em;
+        margin-bottom: 10px;
+        line-height: 1.6;
+        text-shadow: 0 0 5px #00ffff;
+      }
+
+      .donation-button {
+        margin-top: 20px;
+      }
+      .colaborar-button {
+        background: linear-gradient(45deg, #ff00ff, #ff6600);
+        color: #fff;
+        border: 3px solid #fff;
+        border-radius: 12px;
+        padding: 15px 30px;
+        font-size: 1em;
+        font-family: "Press Start 2P", "Courier New", monospace;
+        cursor: pointer;
+        box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+        transition: all 0.3s;
+      }
+
+      .colaborar-button:hover {
+        background: linear-gradient(45deg, #00ffff, #00ccff);
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.7);
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      /* --- Estilos para Foto de Perfil --- */
+      .welcome-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap; /* Para que se reacomode en móviles */
+        gap: 20px; /* Espacio entre el título y la foto */
+        margin-bottom: 15px; /* Mantiene la separación con el párrafo */
+      }
+
+      /* Quita el margen inferior original del h2 ahora que está en un flex */
+      .welcome-banner .welcome-header h2 {
+        margin-bottom: 0;
+      }
+
+      .profile-pic {
+        width: 60px; /* Tamaño pequeño */
+        height: 60px;
+        border-radius: 50%; /* Estilo perfil (circular) */
+        border: 2px solid #00ffff; /* Borde cian a juego con el banner */
+        object-fit: cover; /* Asegura que la imagen llene el círculo */
+
+        /* Sombreado neón a juego */
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.6),
+          0 0 20px rgba(0, 255, 255, 0.4);
+      }
+      /* --- Fin Estilos Foto de Perfil --- */
+
+      /* --- Estilos para Bio Banner (Emergente) --- */
+      .bio-banner {
+        position: fixed; /* Fijo en la pantalla */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* Centra el banner */
+        background: rgba(0, 0, 0, 0.95); /* Fondo oscuro semitransparente */
+        border: 4px solid #ff00ff; /* Borde neón */
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 500px;
+        width: 90%; /* Responsivo */
+        box-shadow: 0 0 30px rgba(255, 0, 255, 0.8),
+          0 0 60px rgba(255, 0, 255, 0.4);
+        z-index: 1000; /* Asegura que esté por encima de todo */
+        display: none; /* OCULTO por defecto */
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        animation: fadeIn 0.5s ease-out; /* Animación de aparición */
+      }
+
+      .bio-banner.show {
+        display: flex; /* Muestra el banner cuando tenga la clase 'show' */
+      }
+
+      .close-bio-button {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #ff00ff;
+        color: #fff;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        line-height: 1; /* Centra la 'X' */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .close-bio-button:hover {
+        background: #00ffff;
+        transform: scale(1.1);
+        box-shadow: 0 0 10px #00ffff;
+      }
+
+      .bio-profile-pic {
+        width: 120px; /* Tamaño de la foto en el banner */
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid #00ffff;
+        object-fit: cover;
+        margin-bottom: 20px;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.7),
+          0 0 30px rgba(0, 255, 255, 0.3);
+      }
+
+      .bio-banner h3 {
+        color: #ffff00;
+        font-size: 1.8em;
+        margin-bottom: 15px;
+        text-shadow: 0 0 10px #ffff00;
+      }
+
+      .bio-banner p {
+        color: #fff;
+        font-size: 0.9em;
+        line-height: 1.7;
+        margin-bottom: 25px;
+        text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+      }
+
+      .social-links {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .social-links a {
+        color: #00ffff;
+        text-decoration: none;
+        font-size: 0.8em;
+        font-family: inherit;
+        padding: 8px 15px;
+        border: 2px solid #00ffff;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+      }
+
+      .social-links a:hover {
+        background: #00ffff;
+        color: #1a0033;
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+      }
+
+      /* Superposición de fondo cuando la bio está abierta */
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 999; /* Detrás del banner, delante del resto */
+        display: none; /* Oculto por defecto */
+        animation: fadeInOverlay 0.5s ease-out;
+      }
+
+      @keyframes fadeInOverlay {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* Media query para pantallas más pequeñas */
+      @media (max-width: 550px) {
+        .bio-banner h3 {
+          font-size: 1.4em;
+        }
+        .bio-banner p {
+          font-size: 0.8em;
+        }
+        .social-links {
+          flex-direction: column;
+          gap: 10px;
+        }
+      }
+      /* --- Fin Estilos Bio Banner --- */
+    </style>
+  </head>
+  <body>
+    <div class="stars" id="stars"></div>
+
+    <div class="main-title">
+      <h1>🕹️ RETRO ARCADE 🕹️</h1>
+      <p class="subtitle">★ GRATIS • PARA JUGAR EN FAMILIA ★</p>
+    </div>
+
+    <!-- Banner de bienvenida -->
+    <div class="welcome-banner">
+      <div class="welcome-header">
+        <h2>🎉 ¡Bienvenidos a Retro Arcade! 🎉</h2>
+        <img
+          src="developer.jpg"
+          alt="Foto del desarrollador"
+          class="profile-pic"
+        />
+      </div>
+      <p>
+        Reviví los juegos sanos, clásicos y 100% gratuitos. Sin anuncios, solo
+        pura diversión familiar.
+      </p>
+      <p>
+        Si te gustan estos proyectos, podés colaborar con $ 1.500 pesos
+        argentinos para ayudarme a seguir desarrollando nuevos juegos y mantener
+        esta sala retro viva 💪 ⭐Es voluntario⭐
+      </p>
+      <div class="donation-button">
+        <!-- Botón visible -->
+        <button id="btnColaborar" class="colaborar-button">
+          💖 Colaborar con $1500
+        </button>
+      </div>
+    </div>
+    <div class="bio-banner" id="bioBanner">
+      <button class="close-bio-button" id="closeBioButton">X</button>
+      <img
+        src="developer.jpg"
+        alt="Foto de perfil del desarrollador"
+        class="bio-profile-pic"
+      />
+      <h3>¡Hola! Soy Adrian Pienso, pero me dicen "Larry".</h3>
+      <p>
+        Soy un desarrollador autodidácta apasionado por la creación de
+        experiencias web interactivas. Hice este proyecto para que mis hijos y
+        cualquier persona que lo desee, puedan experimentar los comienzos de los
+        video-juegos. ¡Si necesitan una web de gestión para un negocio o
+        empresa, no duden en consultarme!
+      </p>
+      <div class="social-links">
+        <a
+          href="https://www.instagram.com/adrianlarryb/"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><i class="bi bi-instagram"></i> Instagram</a
+        >
+        <a
+          href="https://www.facebook.com/Adrian.LarryB"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><i class="bi bi-facebook"></i> Facebook</a
+        >
+        <a
+          href="https://x.com/LarryBernalX"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><i class="bi bi-twitter-x"></i> X (Twitter)</a
+        >
+        <a
+          href="https://www.linkedin.com/in/adrian-pienso/"
+          target="_blank"
+          rel="noopener noreferrer"
+          ><i class="bi bi-linkedin"></i> Linkedin</a
+        >
+      </div>
+    </div>
+    <div class="games-container">
+      <!-- Pac-Man -->
+      <div class="game-card" onclick="window.location.href='pacman.html'">
+        <span class="game-icon">🟡</span>
+        <h2>PAC-MAN</h2>
+        <p>
+          ¡El clásico comecocos! Come todos los puntos mientras escapás de los
+          fantasmas. ¿Podrás conseguir el high score?
+        </p>
+        <a href="pacman.html" class="play-button">▶ Jugar</a>
+      </div>
+
+      <!-- Tetris -->
+      <div class="game-card" onclick="window.location.href='tetris.html'">
+        <span class="game-icon">🧱</span>
+        <h2>TETRIS</h2>
+        <p>
+          Los bloques que caen del cielo. Rotá y acomodalos para hacer líneas
+          completas. ¡La adicción de los 80s!
+        </p>
+        <a href="tetris.html" class="play-button">▶ Jugar</a>
+      </div>
+
+      <!-- Snake -->
+      <div class="game-card" onclick="window.location.href='snake.html'">
+        <span class="game-icon">🐍</span>
+        <h2>SNAKE</h2>
+        <p>
+          La viborita hambrienta. Comé la comida y crecé sin chocarte con tu
+          propia cola. Simple pero imposible de dominar.
+        </p>
+        <a href="snake.html" class="play-button">▶ Jugar</a>
+      </div>
+
+      <!-- Space Invaders -->
+      <div
+        class="game-card"
+        onclick="window.location.href='space-invaders.html'"
+      >
+        <span class="game-icon">👾</span>
+        <h2>SPACE INVADERS</h2>
+        <p>
+          ¡Defendé la Tierra! Dispará a los invasores del espacio antes de que
+          lleguen abajo. Un clásico arcade inmortal.
+        </p>
+        <a href="space-invaders.html" class="play-button">▶ Jugar</a>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>
+        Para mis hijos Anto, Licho, mis hijastros Yaraví y Brandon, y para todos
+        los curiosos que quieran conocer el inicio de los video-juegos
+      </p>
+      <p>© 2025 Retro Arcade - Juegos clásicos para todos</p>
+
+      <div class="visitor-counter">
+        <p class="counter-message">
+          <i class="bi bi-star-fill"></i> Ya somos
+          <a
+            href="https://www.hitwebcounter.com/"
+            target="_blank"
+            class="counter-link"
+          >
+            <img
+              src="https://hitwebcounter.com/counter/counter.php?page=21453765&style=0009&nbdigits=6&type=page&initCount=18"
+              title="Visitas"
+              alt="Contador de visitas"
+              style="border: none; vertical-align: middle"
+            />
+          </a>
+          visitantes <i class="bi bi-star-fill"></i>
+        </p>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById("btnColaborar").addEventListener("click", () => {
+        const url =
+          "https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=164148873-083a353c-2532-4018-bac6-51bed3a9fc6a";
+        // Abrir en nueva pestaña para no cortar la música/juego
+        window.open(url, "_blank", "noopener");
+      });
+      // Crear estrellas en el fondo
+      const starsContainer = document.getElementById("stars");
+      const numberOfStars = 100;
+
+      for (let i = 0; i < numberOfStars; i++) {
+        const star = document.createElement("div");
+        star.className = "star";
+        star.style.left = Math.random() * 100 + "%";
+        star.style.top = Math.random() * 100 + "%";
+        star.style.animationDelay = Math.random() * 3 + "s";
+        starsContainer.appendChild(star);
+      }
+
+      // Prevenir que el click en el botón dispare dos veces
+      document.querySelectorAll(".play-button").forEach((button) => {
+        button.addEventListener("click", (e) => {
+          e.stopPropagation();
+        });
+      });
+
+      // Referencias a los elementos
+      const profilePic = document.querySelector(".profile-pic"); // La foto pequeña del encabezado
+      const bioBanner = document.getElementById("bioBanner");
+      const closeBioButton = document.getElementById("closeBioButton");
+      const body = document.body;
+
+      // Crear un overlay para el fondo
+      const overlay = document.createElement("div");
+      overlay.className = "overlay";
+      document.body.appendChild(overlay);
+
+      // Función para mostrar el banner
+      function showBioBanner() {
+        bioBanner.classList.add("show");
+        overlay.style.display = "block"; // Muestra el overlay
+        body.style.overflow = "hidden"; // Evita el scroll del fondo
+      }
+
+      // Función para ocultar el banner
+      function hideBioBanner() {
+        bioBanner.classList.remove("show");
+        overlay.style.display = "none"; // Oculta el overlay
+        body.style.overflow = "auto"; // Restaura el scroll del fondo
+      }
+
+      // Event Listeners
+      profilePic.addEventListener("click", showBioBanner);
+      closeBioButton.addEventListener("click", hideBioBanner);
+      overlay.addEventListener("click", hideBioBanner); // Ocultar al hacer clic fuera
+    </script>
+  </body>
+</html>

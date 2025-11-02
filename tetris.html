@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>TETRIS - Retro Arcade</title>
+    <link rel="icon" type="image/png" href="retroarcade.png" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        font-family: "Courier New", monospace;
+        background: linear-gradient(180deg, #000428, #004e92);
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+        padding: 10px;
+        touch-action: none;
+      }
+
+      .game-container {
+        text-align: center;
+        width: 100%;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding-top: 50px;
+      }
+
+      h1 {
+        color: #00ffff;
+        font-size: clamp(1.8em, 7vw, 2.5em);
+        margin-bottom: 15px;
+        text-shadow: 0 0 20px #00ffff;
+      }
+
+      .game-area {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        align-items: flex-start;
+        flex-wrap: nowrap;
+        position: relative;
+        width: 100%;
+      }
+
+      canvas#gameCanvas {
+        border: 4px solid #00ffff;
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        background: #000;
+        image-rendering: pixelated;
+        width: 300px;
+        height: 600px;
+        order: 2; /* Canvas al centro en PC */
+      }
+
+      .info-bar {
+        display: contents;
+      }
+
+      .stats-panel,
+      .next-piece-panel {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 15px;
+        border: 3px solid #ff00ff;
+        box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+        min-width: 180px;
+        font-size: 0.9em;
+      }
+
+      .stats-panel {
+        order: 1; /* Stats a la izquierda en PC */
+      }
+
+      .next-piece-panel {
+        order: 3; /* "Siguiente" a la derecha en PC */
+        text-align: center;
+      }
+
+      .stat {
+        margin: 12px 0;
+        color: #ffff00;
+        text-shadow: 0 0 10px #ffff00;
+      }
+
+      .stat span {
+        color: #00ff00;
+        font-size: 1.4em;
+        display: block;
+      }
+
+      .next-piece {
+        margin-top: 0;
+      }
+
+      .next-piece h3 {
+        color: #ff00ff;
+        margin-bottom: 8px;
+        text-shadow: 0 0 10px #ff00ff;
+        font-size: 0.9em;
+      }
+
+      #nextCanvas {
+        border: 2px solid #00ffff;
+        background: #000;
+        width: 120px;
+        height: 120px;
+        image-rendering: pixelated;
+      }
+
+      /* ====== CSS ACTUALIZADO ======
+    Estilos para el div .controls que AHORA está en el panel derecho.
+  */
+      .controls {
+        margin-top: 25px; /* Espacio desde el canvas "siguiente" */
+        color: #00ff00;
+        text-shadow: 0 0 5px #00ff00;
+        font-size: 0.9em;
+        line-height: 1.6;
+        text-align: left; /* Queda mejor que centrado */
+        padding: 0 10px;
+      }
+
+      /* Título "CONTROLES" */
+      .controls h3 {
+        color: #ff00ff; /* Mismo color que "SIGUIENTE" */
+        margin-bottom: 8px;
+        text-shadow: 0 0 10px #ff00ff;
+        font-size: 0.9em;
+        text-align: center;
+      }
+
+      .controls p {
+        margin-bottom: 5px;
+      }
+
+      /* Estilo retro para las "teclas" */
+      .controls .key {
+        color: #00ffff;
+        font-weight: bold;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 0 4px;
+        border: 1px solid #00ffff;
+        border-radius: 3px;
+      }
+      /*
+    ====== FIN DEL CSS ACTUALIZADO ======
+  */
+
+      .button-group {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 15px;
+      }
+
+      .back-button,
+      .mute-button,
+      .fullscreen-button {
+        padding: 8px 16px;
+        background: #ff00ff;
+        color: #fff;
+        border: 3px solid #fff;
+        font-size: clamp(0.8em, 2.5vw, 1em);
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-family: inherit;
+        border-radius: 4px;
+      }
+
+      .mute-button {
+        background: #00ff00;
+        color: #000;
+      }
+      .mute-button.muted {
+        background: #ff0000;
+      }
+      .fullscreen-button {
+        background: #00ff00;
+        color: #000;
+      }
+
+      .back-button:hover,
+      .mute-button:hover,
+      .fullscreen-button:hover {
+        background: #00ffff;
+        color: #000;
+      }
+
+      #gameOver {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.95);
+        padding: 30px;
+        border: 4px solid #ff0000;
+        text-align: center;
+        z-index: 1000;
+        width: 90%;
+        max-width: 380px;
+        box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+      }
+
+      #gameOver h2 {
+        color: #ff0000;
+        font-size: clamp(1.5em, 5vw, 2.5em);
+        margin-bottom: 15px;
+        text-shadow: 0 0 20px #ff0000;
+      }
+
+      #restartBtn {
+        padding: 12px 25px;
+        background: #00ff00;
+        color: #000;
+        border: 3px solid #fff;
+        font-size: clamp(1em, 3vw, 1.2em);
+        cursor: pointer;
+        margin: 10px;
+        font-family: inherit;
+        border-radius: 4px;
+      }
+
+      #restartBtn:hover {
+        background: #00ffff;
+      }
+
+      .mobile-controls {
+        display: none;
+        margin-top: 15px;
+        width: 100%;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .mobile-controls .row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .mobile-btn {
+        width: 70px;
+        height: 70px;
+        background: #0000ff;
+        border: 3px solid #00ffff;
+        color: #fff;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        border-radius: 10px;
+      }
+
+      .mobile-btn.wide {
+        width: 100%;
+        font-size: 16px;
+        background: #ff0000;
+        border-color: #ffff00;
+        box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+      }
+
+      .mobile-btn.placeholder {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        pointer-events: none;
+      }
+
+      .mobile-btn:active {
+        background: #00ffff;
+        color: #000;
+        transform: scale(0.95);
+      }
+
+      .mobile-btn.wide:active {
+        background: #ffff00;
+      }
+
+      .sparkle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: #ffff00;
+        border-radius: 50%;
+        pointer-events: none;
+        animation: sparkleAnim 0.6s ease-out forwards;
+        box-shadow: 0 0 10px #ffff00;
+      }
+
+      @keyframes sparkleAnim {
+        0% {
+          transform: scale(0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(2) rotate(180deg);
+          opacity: 0;
+        }
+      }
+
+      /* === VARIABLES DE ALTURA === */
+      :root {
+        --topbar-h: 44px; /* barra superior */
+        --infobar-h: 90px; /* barra de score/next en mobile */
+        --bottombar-h: 120px; /* altura reservada para controles móviles (2 filas) */
+      }
+
+      /* ======= MOBILE / TABLET ======= */
+      /* ======= MOBILE / TABLET ======= */
+      @media (max-width: 768px), (pointer: coarse) {
+        :root {
+          --topbar-h: 44px;
+          --bottombar-h: 120px; /* Solo controles, ya no hay barra de info */
+        }
+
+        h1 {
+          font-size: clamp(1.1rem, 4.6vw, 1.5rem);
+          margin-bottom: 4px;
+        }
+
+        /* Usamos el 100% del ancho */
+        body {
+          padding-left: 0;
+          padding-right: 0;
+        }
+        .game-container {
+          width: 100%;
+          padding-top: 10px;
+        }
+
+        .game-area {
+          display: flex;
+          /* CAMBIO: Volvemos a 'row' (horizontal) */
+          flex-direction: row;
+          align-items: flex-start;
+          gap: 4px; /* Reducimos el 'gap' */
+          padding-top: 10px; /* Mantenemos el ajuste superior */
+          padding-bottom: calc(var(--bottombar-h) + 8px);
+          width: 100%;
+        }
+
+        /* CAMBIO: El canvas va al medio y su tamaño se basa en la ALTURA disponible */
+        canvas#gameCanvas {
+          --canvas-h: calc(
+            100dvh - var(--topbar-h) - var(--bottombar-h) - 20px
+          );
+          max-height: var(--canvas-h);
+          width: calc(var(--canvas-h) * 0.5); /* Mantiene proporción 1:2 */
+          flex-shrink: 0; /* Impide que se encoja */
+          order: 2; /* Canvas al centro */
+          border-width: 2px;
+        }
+
+        /* CAMBIO: La .info-bar vuelve a ser 'display: contents' (por defecto) 
+           así que no necesitamos ninguna regla para ella aquí. */
+
+        /* CAMBIO: Los paneles ahora son flexibles y ocupan el espacio sobrante */
+        .stats-panel,
+        .next-piece-panel {
+          background: none;
+          border: none;
+          box-shadow: none;
+          padding: 0 2px;
+          min-width: 0;
+          flex: 1 1 0; /* Crecen y se achican para rellenar */
+          height: calc(
+            100dvh - var(--topbar-h) - var(--bottombar-h) - 20px
+          ); /* Ocupan la misma altura del canvas */
+        }
+
+        .stats-panel {
+          order: 1; /* Stats a la izquierda */
+          display: block; /* Para apilar los stats verticalmente */
+          text-align: center;
+        }
+
+        .next-piece-panel {
+          order: 3; /* "Siguiente" a la derecha */
+        }
+
+        /* CAMBIO: Hacemos los stats súper compactos */
+        .stat {
+          margin: 4px auto;
+          font-size: 0.7em; /* Muy pequeño */
+          line-height: 1.1;
+          word-wrap: break-word; /* Por si acaso */
+        }
+        .stat span {
+          font-size: 1.1em; /* Relativamente más grande */
+        }
+
+        /* CAMBIO: El <h3> sigue oculto */
+        .next-piece h3 {
+          display: none;
+        }
+
+        /* CAMBIO: El canvas "siguiente" se ajusta a su contenedor */
+        #nextCanvas {
+          width: 100%;
+          height: auto;
+          aspect-ratio: 1 / 1; /* Mantiene la proporción cuadrada */
+          border-width: 1px;
+        }
+
+        /* --- El resto de controles y barras (sin cambios) --- */
+
+        /* Topbar fija */
+        .button-group {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 999;
+          background: rgba(0, 0, 0, 0.55);
+          backdrop-filter: blur(4px);
+          padding: 10px 8px;
+          margin: 0;
+          gap: 6px;
+          justify-content: center;
+        }
+        .back-button,
+        .mute-button,
+        .fullscreen-button {
+          padding: 6px 10px;
+          border-width: 2px;
+          font-size: 0.82em;
+          border-radius: 6px;
+        }
+
+        /* Barra de controles fija abajo, 2 filas compactas */
+        .mobile-controls {
+          display: block;
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 998;
+          background: linear-gradient(
+            180deg,
+            rgba(0, 0, 0, 0.1),
+            rgba(0, 0, 0, 0.8)
+          );
+          padding: 8px 10px 10px;
+          height: var(--bottombar-h);
+        }
+        .mobile-controls .row {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 6px;
+        }
+        .mobile-controls .row:last-child {
+          margin-bottom: 0;
+        }
+
+        .row-top .mobile-btn {
+          flex: 1;
+          min-width: 0;
+          height: 46px;
+          font-size: 15px;
+        }
+        .row-bottom .mobile-btn {
+          flex: 1;
+          min-width: 0;
+          height: 46px;
+          font-size: 15px;
+        }
+
+        .mobile-btn {
+          background: #0000ff;
+          border: 3px solid #00ffff;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          user-select: none;
+          border-radius: 10px;
+          box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+        }
+        #btn-hard-drop {
+          background: #ff0000;
+          border-color: #ffff00;
+        }
+        .mobile-btn:active {
+          background: #00ffff;
+          color: #000;
+          transform: scale(0.97);
+        }
+
+        /* Ocultar leyenda desktop en mobile */
+        .controls {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-container">
+      <h1>TETRIS</h1>
+
+      <div class="game-area">
+        <div class="info-bar">
+          <div class="stats-panel">
+            <div class="stat">SCORE<br /><span id="score">0</span></div>
+            <div class="stat">NIVEL<br /><span id="level">1</span></div>
+            <div class="stat">LÍNEAS<br /><span id="lines">0</span></div>
+          </div>
+
+          <div class="next-piece-panel">
+            <div class="next-piece">
+              <h3>SIGUIENTE:</h3>
+              <canvas id="nextCanvas" width="120" height="120"></canvas>
+            </div>
+
+            <div class="controls">
+              <h3>CONTROLES</h3>
+              <p><span class="key">⬅️ ➡️</span> Mover</p>
+              <p><span class="key">⬆️</span> Rotar</p>
+              <p><span class="key">⬇️</span> Bajar</p>
+              <p><span class="key">ESPACIO</span> Caída</p>
+            </div>
+          </div>
+        </div>
+
+        <canvas id="gameCanvas" width="300" height="600"></canvas>
+      </div>
+
+      <div class="mobile-controls">
+        <div class="row row-top">
+          <div class="mobile-btn" id="btn-left">Izq</div>
+          <div class="mobile-btn" id="btn-rotate">Rotar</div>
+          <div class="mobile-btn" id="btn-right">Der</div>
+        </div>
+        <div class="row row-bottom">
+          <div class="mobile-btn" id="btn-drop">Abajo</div>
+          <div class="mobile-btn" id="btn-hard-drop">CAÍDA RÁPIDA</div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="mute-button" id="muteBtn">SONIDO</button>
+        <button class="fullscreen-button" id="fullscreenBtn">
+          PANTALLA COMPLETA
+        </button>
+        <a href="index.html" class="back-button">Volver</a>
+      </div>
+    </div>
+
+    <div id="gameOver">
+      <h2>GAME OVER</h2>
+      <p style="color: #ffff00; font-size: 1.4em; margin-bottom: 15px">
+        SCORE: <span id="finalScore">0</span><br />
+        LÍNEAS: <span id="finalLines">0</span>
+      </p>
+      <button id="restartBtn">JUGAR DE NUEVO</button>
+      <br />
+      <a href="index.html" class="back-button">Menú</a>
+    </div>
+
+    <audio id="music" src="tetris-theme.mp3" loop></audio>
+
+    <script>
+      //
+      // TU SCRIPT DE JAVASCRIPT VA AQUÍ (sin cambios)
+      // ...
+      //
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const nextCanvas = document.getElementById("nextCanvas");
+      const nextCtx = nextCanvas.getContext("2d");
+      const music = document.getElementById("music");
+
+      class TetrisSounds {
+        constructor() {
+          this.audioCtx = null;
+          this.masterGain = null;
+          this.isMuted = false;
+        }
+        init() {
+          if (this.audioCtx) return;
+          try {
+            this.audioCtx = new (window.AudioContext ||
+              window.webkitAudioContext)();
+            this.masterGain = this.audioCtx.createGain();
+            this.masterGain.connect(this.audioCtx.destination);
+            this.masterGain.gain.value = 1;
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        _playSound(freq, type, duration, volume = 0.5) {
+          if (!this.audioCtx || this.isMuted) return;
+          const now = this.audioCtx.currentTime;
+          const osc = this.audioCtx.createOscillator();
+          const gain = this.audioCtx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(volume, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+          osc.connect(gain);
+          gain.connect(this.masterGain);
+          osc.start(now);
+          osc.stop(now + duration);
+        }
+        playMove() {
+          this._playSound(300, "square", 0.05, 0.2);
+        }
+        playRotate() {
+          this._playSound(900, "triangle", 0.05);
+        }
+        playHardDrop() {
+          this._playSound(100, "square", 0.1, 0.3);
+        }
+        playLineClear() {
+          const now = this.audioCtx.currentTime;
+          const osc = this.audioCtx.createOscillator();
+          const gain = this.audioCtx.createGain();
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(400, now);
+          osc.frequency.linearRampToValueAtTime(1200, now + 0.15);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+          osc.connect(gain);
+          gain.connect(this.masterGain);
+          osc.start(now);
+          osc.stop(now + 0.15);
+          createSparkles();
+        }
+        playGameOver() {
+          const now = this.audioCtx.currentTime;
+          const osc = this.audioCtx.createOscillator();
+          const gain = this.audioCtx.createGain();
+          osc.type = "square";
+          osc.frequency.setValueAtTime(500, now);
+          osc.frequency.linearRampToValueAtTime(100, now + 0.8);
+          gain.gain.setValueAtTime(0.5, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+          osc.connect(gain);
+          gain.connect(this.masterGain);
+          osc.start(now);
+          osc.stop(now + 0.8);
+        }
+        toggleMute() {
+          this.isMuted = !this.isMuted;
+          music.muted = this.isMuted;
+          if (this.masterGain)
+            this.masterGain.gain.value = this.isMuted ? 0 : 1;
+          return this.isMuted;
+        }
+      }
+
+      const sounds = new TetrisSounds();
+
+      function createSparkles() {
+        const container = document.querySelector(".game-area");
+        for (let i = 0; i < 15; i++) {
+          const s = document.createElement("div");
+          s.className = "sparkle";
+          s.style.left = `${150 + Math.random() * 150}px`;
+          s.style.top = `${Math.random() * 600}px`;
+          container.appendChild(s);
+          setTimeout(() => s.remove(), 600);
+        }
+      }
+
+      const BLOCK_SIZE = 30;
+      const COLS = 10;
+      const ROWS = 20;
+
+      let board = Array(ROWS)
+        .fill()
+        .map(() => Array(COLS).fill(0));
+      let score = 0,
+        lines = 0,
+        level = 1;
+      let gameRunning = true;
+      let dropCounter = 0,
+        dropInterval = 1000,
+        lastTime = 0;
+
+      const PIECES = {
+        I: { shape: [[1, 1, 1, 1]], color: "#00FFFF" },
+        O: {
+          shape: [
+            [1, 1],
+            [1, 1],
+          ],
+          color: "#FFFF00",
+        },
+        T: {
+          shape: [
+            [0, 1, 0],
+            [1, 1, 1],
+          ],
+          color: "#FF00FF",
+        },
+        S: {
+          shape: [
+            [0, 1, 1],
+            [1, 1, 0],
+          ],
+          color: "#00FF00",
+        },
+        Z: {
+          shape: [
+            [1, 1, 0],
+            [0, 1, 1],
+          ],
+          color: "#FF0000",
+        },
+        J: {
+          shape: [
+            [1, 0, 0],
+            [1, 1, 1],
+          ],
+          color: "#0000FF",
+        },
+        L: {
+          shape: [
+            [0, 0, 1],
+            [1, 1, 1],
+          ],
+          color: "#FFA500",
+        },
+      };
+
+      let currentPiece = null,
+        nextPiece = null,
+        pieceX = 0,
+        pieceY = 0;
+
+      function createPiece() {
+        const keys = Object.keys(PIECES);
+        const key = keys[Math.floor(Math.random() * keys.length)];
+        return {
+          shape: PIECES[key].shape.map((r) => [...r]),
+          color: PIECES[key].color,
+        };
+      }
+
+      function drawBlock(ctx, x, y, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.fillRect(x * BLOCK_SIZE + 2, y * BLOCK_SIZE + 2, BLOCK_SIZE - 4, 8);
+      }
+
+      function drawBoard() {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let y = 0; y < ROWS; y++) {
+          for (let x = 0; x < COLS; x++) {
+            if (board[y][x]) drawBlock(ctx, x, y, board[y][x]);
+          }
+        }
+      }
+
+      function drawPiece() {
+        if (!currentPiece) return;
+        for (let y = 0; y < currentPiece.shape.length; y++) {
+          for (let x = 0; x < currentPiece.shape[y].length; x++) {
+            if (currentPiece.shape[y][x]) {
+              drawBlock(ctx, pieceX + x, pieceY + y, currentPiece.color);
+            }
+          }
+        }
+      }
+
+      function drawNextPiece() {
+        nextCtx.fillStyle = "#000";
+        nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+        if (!nextPiece) return;
+        const offsetX = (4 - nextPiece.shape[0].length) / 2;
+        const offsetY = (4 - nextPiece.shape.length) / 2;
+        for (let y = 0; y < nextPiece.shape.length; y++) {
+          for (let x = 0; x < nextPiece.shape[y].length; x++) {
+            if (nextPiece.shape[y][x]) {
+              nextCtx.fillStyle = nextPiece.color;
+              nextCtx.fillRect(
+                (offsetX + x) * BLOCK_SIZE,
+                (offsetY + y) * BLOCK_SIZE,
+                BLOCK_SIZE,
+                BLOCK_SIZE
+              );
+              nextCtx.strokeStyle = "#000";
+              nextCtx.lineWidth = 2;
+              nextCtx.strokeRect(
+                (offsetX + x) * BLOCK_SIZE,
+                (offsetY + y) * BLOCK_SIZE,
+                BLOCK_SIZE,
+                BLOCK_SIZE
+              );
+            }
+          }
+        }
+      }
+
+      function collision(offsetX = 0, offsetY = 0, shape = currentPiece.shape) {
+        for (let y = 0; y < shape.length; y++) {
+          for (let x = 0; x < shape[y].length; x++) {
+            if (shape[y][x]) {
+              const newX = pieceX + x + offsetX;
+              const newY = pieceY + y + offsetY;
+              if (newX < 0 || newX >= COLS || newY >= ROWS) return true;
+              if (newY >= 0 && board[newY][newX]) return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      function merge() {
+        for (let y = 0; y < currentPiece.shape.length; y++) {
+          for (let x = 0; x < currentPiece.shape[y].length; x++) {
+            if (currentPiece.shape[y][x]) {
+              if (pieceY + y < 0) {
+                gameOver();
+                return;
+              }
+              board[pieceY + y][pieceX + x] = currentPiece.color;
+            }
+          }
+        }
+      }
+
+      function rotate() {
+        if (!gameRunning) return;
+        const rotated = currentPiece.shape[0].map((_, i) =>
+          currentPiece.shape.map((row) => row[i]).reverse()
+        );
+        if (!collision(0, 0, rotated)) {
+          currentPiece.shape = rotated;
+          sounds.playRotate();
+        }
+      }
+
+      function clearLines() {
+        let linesCleared = 0;
+        for (let y = ROWS - 1; y >= 0; y--) {
+          if (board[y].every((cell) => cell !== 0)) {
+            board.splice(y, 1);
+            board.unshift(Array(COLS).fill(0));
+            linesCleared++;
+            y++;
+          }
+        }
+        if (linesCleared > 0) {
+          sounds.playLineClear();
+          lines += linesCleared;
+          score += [0, 40, 100, 300, 1200][linesCleared] * level;
+          level = Math.floor(lines / 10) + 1;
+          dropInterval = Math.max(100, 1000 - (level - 1) * 100);
+          document.getElementById("score").textContent = score;
+          document.getElementById("lines").textContent = lines;
+          document.getElementById("level").textContent = level;
+        }
+      }
+
+      function drop() {
+        if (!gameRunning) return;
+        if (!collision(0, 1)) pieceY++;
+        else {
+          merge();
+          clearLines();
+          spawnPiece();
+        }
+        dropCounter = 0;
+      }
+
+      function hardDrop() {
+        if (!gameRunning) return;
+        while (!collision(0, 1)) {
+          pieceY++;
+          score += 2;
+        }
+        sounds.playHardDrop();
+        document.getElementById("score").textContent = score;
+        drop();
+      }
+
+      function spawnPiece() {
+        currentPiece = nextPiece || createPiece();
+        nextPiece = createPiece();
+        pieceX =
+          Math.floor(COLS / 2) - Math.floor(currentPiece.shape[0].length / 2);
+        pieceY = 0;
+        if (collision()) gameOver();
+        drawNextPiece();
+      }
+
+      document.addEventListener("keydown", (e) => {
+        if (!gameRunning) return;
+        switch (e.key) {
+          case "ArrowLeft":
+            if (!collision(-1, 0)) {
+              pieceX--;
+              sounds.playMove();
+            }
+            break;
+          case "ArrowRight":
+            if (!collision(1, 0)) {
+              pieceX++;
+              sounds.playMove();
+            }
+            break;
+          case "ArrowDown":
+            drop();
+            sounds.playMove();
+            break;
+          case "ArrowUp":
+            rotate();
+            break;
+          case " ":
+            e.preventDefault();
+            hardDrop();
+            break;
+        }
+      });
+
+      document
+        .getElementById("btn-left")
+        .addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          if (gameRunning && !collision(-1, 0)) {
+            pieceX--;
+            sounds.playMove();
+          }
+        });
+      document
+        .getElementById("btn-right")
+        .addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          if (gameRunning && !collision(1, 0)) {
+            pieceX++;
+            sounds.playMove();
+          }
+        });
+      document
+        .getElementById("btn-drop")
+        .addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          drop();
+          sounds.playMove();
+        });
+      document
+        .getElementById("btn-rotate")
+        .addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          rotate();
+        });
+      document
+        .getElementById("btn-hard-drop")
+        .addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          hardDrop();
+        });
+
+      document.getElementById("muteBtn").addEventListener("click", function () {
+        const muted = sounds.toggleMute();
+        this.textContent = muted ? "MUTE" : "SONIDO";
+        this.classList.toggle("muted", muted);
+      });
+
+      document.getElementById("fullscreenBtn").addEventListener("click", () => {
+        if (!document.fullscreenElement)
+          document.documentElement.requestFullscreen();
+        else document.exitFullscreen();
+      });
+
+      let musicStarted = false;
+      function startAudio() {
+        if (musicStarted) return;
+        sounds.init();
+        music.play().catch(() => {});
+        musicStarted = true;
+        document.removeEventListener("keydown", startAudio);
+        document.removeEventListener("touchstart", startAudio);
+      }
+      document.addEventListener("keydown", startAudio, { once: true });
+      document.addEventListener("touchstart", startAudio, { once: true });
+
+      function update(time = 0) {
+        if (!gameRunning) return;
+        const delta = time - lastTime;
+        lastTime = time;
+        dropCounter += delta;
+        if (dropCounter > dropInterval) {
+          drop();
+          dropCounter = 0;
+        }
+        drawBoard();
+        drawPiece();
+        requestAnimationFrame(update);
+      }
+
+      function gameOver() {
+        gameRunning = false;
+        music.pause();
+        sounds.playGameOver();
+        document.getElementById("finalScore").textContent = score;
+        document.getElementById("finalLines").textContent = lines;
+        document.getElementById("gameOver").style.display = "block";
+      }
+
+      document
+        .getElementById("restartBtn")
+        .addEventListener("click", () => location.reload());
+
+      spawnPiece();
+      update();
+
+      // --- Gestos sobre el canvas ---
+      let tStartX = 0,
+        tStartY = 0,
+        tStartT = 0;
+      const TAP_MAX_DIST = 10; // px
+      const HARD_DROP_DIST = 120; // px
+
+      canvas.addEventListener(
+        "touchstart",
+        (e) => {
+          const t = e.changedTouches[0];
+          tStartX = t.clientX;
+          tStartY = t.clientY;
+          tStartT = Date.now();
+        },
+        { passive: true }
+      );
+
+      canvas.addEventListener("touchend", (e) => {
+        if (!gameRunning) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - tStartX;
+        const dy = t.clientY - tStartY;
+        const adx = Math.abs(dx),
+          ady = Math.abs(dy);
+
+        // Tap -> rotar
+        if (adx < TAP_MAX_DIST && ady < TAP_MAX_DIST) {
+          rotate();
+          return;
+        }
+
+        if (adx > ady) {
+          // Desplazamiento horizontal
+          if (dx > 0 && !collision(1, 0)) {
+            pieceX++;
+            sounds.playMove();
+          } else if (dx < 0 && !collision(-1, 0)) {
+            pieceX--;
+            sounds.playMove();
+          }
+        } else {
+          // Desplazamiento vertical
+          if (dy > HARD_DROP_DIST) {
+            hardDrop();
+          } else if (dy > 0) {
+            drop();
+            sounds.playMove();
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
